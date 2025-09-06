@@ -1,9 +1,5 @@
 package com.lld.calculator.parser;
 
-import com.lld.calculator.model.BinaryExpression;
-import com.lld.calculator.model.Expression;
-import com.lld.calculator.model.NumberExpression;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,36 +7,9 @@ import java.util.Stack;
 
 public class ExpressionParser {
     //12*(1+4)
-    public Expression parse(String exp){
+    public List<String> parse(String exp){
         List<String> token = tokenize(exp);
-        List<String> postFixExp = infixToPostfix(token);
-        ExpressionTreeBuilder treeBuilder = new ExpressionTreeBuilder();
-        return treeBuilder.buildExpressionTree(postFixExp);
-
-    }
-
-    private  List<String> infixToPostfix(List<String> tokens) {
-        List<String> output=new ArrayList<>();
-        Stack<String> expStack = new Stack<>();
-        Map<String,Integer> precedence=Map.of("+",1,"-",1,"*",2,"/",2);
-        for (String token: tokens){
-            if(token.matches("\\d+")){
-                output.add(token);
-            }else {
-                if ("(+-*/".contains(token)){
-                    expStack.push(token);
-                }else if(")".equals(token)){
-                    while (!expStack.isEmpty() && !expStack.peek().equals("(")){
-                        output.add(expStack.pop());
-                    }
-                    expStack.pop(); // remove '('
-                }
-            }
-        }
-        while (!expStack.isEmpty()) {
-            output.add(expStack.pop());
-        }
-        return output;
+        return  infixToPostfix(token);
     }
 
     private List<String> tokenize(String exp) {
@@ -63,5 +32,43 @@ public class ExpressionParser {
             tokens.add(num.toString());
         }
         return tokens;
+    }
+
+    private  List<String> infixToPostfix(List<String> tokens) {
+        List<String> output=new ArrayList<>();
+        Stack<String> expStack = new Stack<>();
+        Map<String,Integer> precedence=Map.of("+",1,"-",1,"*",2,"/",2);
+        for (String token: tokens){
+            if(token.matches("\\d+")){
+                output.add(token);
+            }else {
+                if ("+-*/".contains(token)){
+                    while (!expStack.isEmpty()
+                            && !"(".equals(expStack.peek())
+                            && precedence.get(expStack.peek()) >= precedence.get(token)) {
+                        output.add(expStack.pop());
+                        /*
+                            Token "+" Operator
+                            and Stack top = "*" (precedence 2)
+                            "*" has higher precedence than "+" (1) → pop * first
+                            Add * to output
+                            Push + to stack
+                         */
+                    }
+                    expStack.push(token);
+                } else if ("(".equals(token)) {
+                    expStack.push(token);
+                } else if(")".equals(token)){
+                    while (!expStack.isEmpty() && !expStack.peek().equals("(")){
+                        output.add(expStack.pop());
+                    }
+                    expStack.pop(); // remove '('
+                }
+            }
+        }
+        while (!expStack.isEmpty()) {
+            output.add(expStack.pop());
+        }
+        return output;
     }
 }

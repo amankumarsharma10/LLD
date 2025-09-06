@@ -1,15 +1,14 @@
 package com.lld.calculator;
 
-import com.lld.calculator.model.Expression;
-import com.lld.calculator.parser.ExpressionParser;
+import com.lld.calculator.service.CalculatorService;
 
 public class CalculatorExpressionMain {
     public static void main(String[] args) {
         String input = "(3 + 5 ) * 2";
 
-        ExpressionParser parser = new ExpressionParser();
-        Expression expr = parser.parse(input);
+        CalculatorService calculator = new CalculatorService();
+        System.out.println(calculator.evaluate("(3 + 5) * 2"));  // 16
+        System.out.println(calculator.evaluate("3 + 4 * 2"));
 
-        System.out.println(expr.evaluate()); // Output: 16
     }
 }
