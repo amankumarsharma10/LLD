@@ -16,7 +16,8 @@ public class LoggerFactory {
         try (InputStream is = LoggerFactory.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
             props.load(is);
         }
-        Formatter simpleFormatter = r -> String.format("%s [%s] %s", r.getTimestamp(), r.getLogLevel(), r.getMessage());
+        Formatter simpleFormatter = r -> String.format("%s [%s] %s %n%s", r.getTimestamp(), r.getLogLevel(), r.getMessage()
+                , formatThrowable(r.getThrowable()));
         LogHandler firstHandler  = null;
         LogHandler lastHandler = null;
 
@@ -43,5 +44,15 @@ public class LoggerFactory {
 
 
         return new Logger(loggerName,firstHandler);
+    }
+
+    private static String formatThrowable(Throwable t) {
+        if (t == null) return "";
+        StringBuilder sb = new StringBuilder();
+        sb.append(t.toString()).append(System.lineSeparator());
+        for (StackTraceElement e : t.getStackTrace()) {
+            sb.append("\tat ").append(e).append(System.lineSeparator());
+        }
+        return sb.toString();
     }
 }
