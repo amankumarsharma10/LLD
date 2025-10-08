@@ -14,6 +14,9 @@ public class LoggerFactory {
     public static Logger getLogger(String loggerName) throws Exception {
         Properties props = new Properties();
         try (InputStream is = LoggerFactory.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
+            if (is == null) {
+                throw new IllegalStateException("Missing " + PROPERTIES_FILE + " in classpath");
+            }
             props.load(is);
         }
         Formatter simpleFormatter = r -> String.format("%s [%s] %s %n%s", r.getTimestamp(), r.getLogLevel(), r.getMessage()
@@ -37,6 +40,8 @@ public class LoggerFactory {
 
             if (firstHandler  == null) firstHandler  = fileHandler;
             else lastHandler .setNext(fileHandler);
+
+            lastHandler = fileHandler;
         }
 
         // Default console if no handler enabled
